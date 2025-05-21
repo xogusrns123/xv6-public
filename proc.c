@@ -89,6 +89,7 @@ found:
   p->state = EMBRYO;
   p->pid = nextpid++;
   p->scheduler = 0;
+  p->sched_pending = 0;
 
   release(&ptable.lock);
 
@@ -211,6 +212,7 @@ fork(void)
 
   safestrcpy(np->name, curproc->name, sizeof(curproc->name));
   np->scheduler = curproc->scheduler;
+  np->sched_pending = 0;
 
   pid = np->pid;
 
