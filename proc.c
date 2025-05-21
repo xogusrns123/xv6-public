@@ -88,6 +88,7 @@ allocproc(void)
 found:
   p->state = EMBRYO;
   p->pid = nextpid++;
+  p->scheduler = 0;
 
   release(&ptable.lock);
 
@@ -209,6 +210,7 @@ fork(void)
   np->cwd = idup(curproc->cwd);
 
   safestrcpy(np->name, curproc->name, sizeof(curproc->name));
+  np->scheduler = curproc->scheduler;
 
   pid = np->pid;
 
