@@ -55,6 +55,11 @@ trap(struct trapframe *tf)
       release(&tickslock);
     }
     lapiceoi();
+    if(myproc() && myproc()->scheduler && (tf->cs&3) == DPL_USER){
+      tf->esp -= 4;
+      *(uint*)tf->esp = tf->eip;
+      tf->eip = myproc()->scheduler;
+    }
     break;
   case T_IRQ0 + IRQ_IDE:
     ideintr();
