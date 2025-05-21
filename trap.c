@@ -43,12 +43,6 @@ trap(struct trapframe *tf)
     syscall();
     if(myproc()->killed)
       exit();
-    if(myproc()->sched_pending && myproc()->scheduler && (tf->cs&3) == DPL_USER){
-      myproc()->sched_pending = 0;
-      tf->esp -= 4;
-      *(uint*)tf->esp = tf->eip;
-      tf->eip = myproc()->scheduler;
-    }
     return;
   }
 
@@ -61,14 +55,10 @@ trap(struct trapframe *tf)
       release(&tickslock);
     }
     lapiceoi();
-    if(myproc() && myproc()->scheduler){
-      if((tf->cs&3) == DPL_USER){
-        tf->esp -= 4;
-        *(uint*)tf->esp = tf->eip;
-        tf->eip = myproc()->scheduler;
-      } else {
-        myproc()->sched_pending = 1;
-      }
+    if(myproc() && myproc()->scheduler && (tf->cs&3) == DPL_USER){
+      tf->esp -= 4;
+      *(uint*)tf->esp = tf->eip;
+      tf->eip = myproc()->scheduler;
     }
     break;
   case T_IRQ0 + IRQ_IDE:
@@ -120,13 +110,6 @@ trap(struct trapframe *tf)
   if(myproc() && myproc()->state == RUNNING &&
      tf->trapno == T_IRQ0+IRQ_TIMER)
     yield();
-
-  if(myproc() && myproc()->sched_pending && (tf->cs&3) == DPL_USER && myproc()->scheduler){
-    myproc()->sched_pending = 0;
-    tf->esp -= 4;
-    *(uint*)tf->esp = tf->eip;
-    tf->eip = myproc()->scheduler;
-  }
 
   // Check if the process has been killed since we yielded
   if(myproc() && myproc()->killed && (tf->cs&3) == DPL_USER)

@@ -102,7 +102,6 @@ sys_uthread_create(void)
   p = myproc();
   if(p->scheduler == 0)
     p->scheduler = (uint)func;
-  p->sched_pending = 0;
 
   return 0;
 }
