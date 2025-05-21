@@ -39,7 +39,9 @@ static void
 thread_schedule(void)
 {
   thread_p t;
-
+  
+  if(current_thread != &all_thread[0] && current_thread->state == RUNNING)
+    current_thread->state = RUNNABLE;
   /* Find another runnable thread. */
   next_thread = 0;
   for (t = all_thread; t < all_thread + MAX_THREAD; t++) {
